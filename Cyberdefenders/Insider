@@ -1,0 +1,164 @@
+"Insider CTF" Completed 26-05-2021
+
+Easy CTF, how to capture flags quick and dirty... 
+ 
+SHA1SUM	d820264d825fdaeb2146bf7b4c4e03684e700007
+Published	May 25, 2021
+Author	DFA
+Size	83 MB
+Tags	LINUXINCIDENT RESPONSEFTKKALI
+
+Instructions	
+Unzip the challenge (pass: cyberdefenders.org)
+
+
+https://cyberdefenders.org/labs/64
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Scenario:
+After Karen started working for 'TAAUSAI,' she began to do some illegal activities inside the company. 'TAAUSAI' hired you to kick off an investigation on this case.
+
+You acquired a disk image and found that Karen uses Linux OS on her machine. Analyze the disk image of Karen's computer and answer the provided questions.
+
+First thing first. I loaded the FirstHack.ad1 image in FTK imager. ()
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Questions:
+
+#1	What distribution of Linux is being used on this machine?
+
+You can do all sorts of fancy stuff like mounting and catting for versions but the answer is right in front of your eyes in the /roor/boot/ directory.
+This contains 4 files:
+config-4.13.0-kali1-amd64
+initrd.img-4.13.0-kali1-amd64
+System.map-4.13.0-kali1-amd64
+vmlinuz-4.13.0-kali1-amd64
+
+Flag <Kali>
+
+#2 What is the MD5 hash of the apache access.log?
+
+Where are logs stored normally? var/log right?
+The access.log is stored under var/log/apache2/access.log
+Export this file's has and you have the flag.
+
+Flag <d41d8cd98f00b204e9800998ecf8427e>
+
+#3	It is believed that a credential dumping tool was downloaded? What is the file name of the download?
+
+~Let's not waste time. 
+Check root/Downloads
+
+Flag <mimikatz_trunk.zip>
+
+#4 There was a super-secret file created. What is the absolute path?
+
+Looking for the file I found remnants of the SuperSecretFile.txt file in the Trash at root/.local/share/Trash/info so it must have been deleted.
+æj
+........Àj
+.è.......Ïj
+.Ü...SuperSecretFile.txt...
+
+So moving on to check the history of what happened. Go to root/.bash_history you will find the following lines in the history of commands:
+touch snky snky > /root/Desktop/SuperSecretFile.txt
+cat snky snky > /root/Desktop/SuperSecretFile.txt 
+
+Flag < /root/Desktop/SuperSecretFile.txt>
+
+
+#5	What program used didyouthinkwedmakeiteasy.jpg during execution?
+
+We are already in the bash history (root/.bash_history) from the previous question. When you examine the rest of the history you see the entries:
+
+history > history.txt
+binwalk didyouthinkwedmakeiteasy.jpg 
+
+Flag <binwalk>
+
+#6	What is the third goal from the checklist Karen created?
+
+Go to root/Desktop there is a file called checklist that contains:
+
+Check List:
+
+- Gain Bob's Trust
+- Learn how to hack
+- Profit
+
+Flag <Profit>
+
+#7 How many times was apache run?
+
+Check the logs again under var/log/apache2. There are 3 files:
+
+Name                          Size
+access.log                    0kb
+error.log                     0kb
+other_vhosts_access.log       0kb
+
+Assuming that no logs where ever cleared it never actually ran.
+
+Flag <0>
+
+#8	It is believed this machine was used to attack another. What file proves this?
+
+Browsing arround the file system I found a file screenshot of a remote desktop session to another computer...this must be the flag.
+
+Flag </root/irZLAohL.jpeg>
+
+#9	Within the Documents file path, it is believed that Karen was taunting a fellow computer expert through a bash script. Who was Karen taunting?
+
+
+Looking in the bash history you see the user played around with scripting:
+
+cd Documents/
+mkdir myfirsthack
+cd myfirsthack/
+touch hellworld.sh
+vim hellworld.sh 
+chmod +x hellworld.sh 
+./hellworld.sh 
+touch firstscript
+vim firstscript 
+chmod +x firstscript 
+etc etc
+
+It contains references to a dir called myfirsthack. Browsing around in root/Documents/myfirsthack there is a file called firstscript_fixed that contains:
+
+echo "Showing you your current path"
+pwd
+echo "Show my default route"
+ip route | grep --color default
+echo "Show network connections w/ port 80"
+netstat | grep --color 80
+echo "Heck yeah! I can write bash too Young"
+
+The only word that stands out here is Young....
+
+Flag <Young>
+
+#10	A user su'd to root at 11:26 multiple times. Who was it?
+
+Where are the logs again.....var/log/auth.log contains all authentications related loggins.
+
+Looking at the time 11:26:
+
+Mar 20 11:26:22 KarenHacker su[4060]: Successful su for postgres by root
+Mar 20 11:26:22 KarenHacker su[4060]: + ??? root:postgres
+
+Flag <postgres>
+
+#11	Based on the bash history, what is the current working directory?
+
+Back to the bash history:
+
+ls
+cd ../root
+cd ../root/Documents/myfirsthack/../../Desktop/
+sl
+ls
+cd ../Documents/myfirsthack/
+
+
+Flag < /root/Documents/myfirsthack/>
